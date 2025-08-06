@@ -606,6 +606,7 @@ $string['somekeywordsexists'] = 'Some of these keywords already exist';
 
 
 
+$string['useralreadyattempted'] = 'You have already attempted this quiz.';
 // ...existing code...
 $string['attemptlimitation'] = 'Attempt Limitation';
 $string['attemptlimitation_desc'] = 'If enabled, users can only attempt this activity once.';

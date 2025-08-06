@@ -23,12 +23,13 @@
 require_once("../../config.php");
 require_once("locallib.php");
 
-global $PAGE, $DB, $CFG, $OUTPUT;
+global $PAGE, $DB, $CFG, $OUTPUT,$USER;
 
 $id = required_param('id', PARAM_INT);
 
 // Verify course context.
 $cm = get_coursemodule_from_id('hvp', $id);
+
 if (!$cm) {
     print_error('invalidcoursemodule');
 }
@@ -37,8 +38,7 @@ if (!$course) {
     print_error('coursemisconf');
 }
 require_course_login($course, true, $cm);
-$context = context_module::instance($cm->id);
-require_capability('mod/hvp:view', $context);
+
 
 // Set up view assets.
 $view    = new \mod_hvp\view_assets($cm, $course);
@@ -50,7 +50,22 @@ $PAGE->set_url(new \moodle_url('/mod/hvp/view.php', array('id' => $id)));
 $PAGE->set_title(format_string($content['title']));
 $PAGE->set_heading($course->fullname);
 
-// Add H5P assets to page.
+$context = context_module::instance($cm->id);
+require_capability('mod/hvp:view', $context);
+// check the user exit or not ?
+$sql =  "SELECT * FROM {hvp_xapi_results} WHERE content_id = :content_id AND user_id = :user_id";
+$params = array('content_id' => $content['id'], 'user_id' => $USER->id);
+
+$record = $DB->get_record_sql($sql, $params);
+
+if ($record) {
+  echo $OUTPUT->header();
+    echo $OUTPUT->notification(get_string('useralreadyattempted', 'hvp'), 'info');
+    echo $OUTPUT->footer();
+    return;
+} else {
+    
+    // Add H5P assets to page.
 $view->addassetstopage();
 $view->logviewed();
 
@@ -99,3 +114,6 @@ if ($hashub) {
 
 $view->outputview();
 echo $OUTPUT->footer();
+
+};
+
